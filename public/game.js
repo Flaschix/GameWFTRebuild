@@ -20,9 +20,7 @@ class PreloadScene extends Phaser.Scene {
         this.load.image('mobileXButton', 'assets/Press.png');
 
         // Загружаем изображения для зон
-        for (let i = 1; i <= 9; i++) {
-            this.load.image(`overlay${i}`, `assets/${i}.png`);
-        }
+
     }
 
     create() {
@@ -39,6 +37,12 @@ class MainScene extends Phaser.Scene {
         this.isDragging = false;
         this.currentZoneIndex = -1;
         this.overlayImages = [];
+    }
+
+    preload() {
+        for (let i = 1; i <= 9; i++) {
+            this.load.image(`overlay${i}`, `assets/${i}.png`);
+        }
     }
 
     create() {
@@ -228,20 +232,22 @@ class MainScene extends Phaser.Scene {
     updatePlayerMovement() {
         this.player.setVelocity(0);
 
-        if (this.cursors.left.isDown || (this.isDragging && this.joystickThumb.x < this.joystickBase.x - 10)) {
-            this.player.setVelocityX(-160);
-            this.player.anims.play('walk_left', true);
-        } else if (this.cursors.right.isDown || (this.isDragging && this.joystickThumb.x > this.joystickBase.x + 10)) {
-            this.player.setVelocityX(160);
-            this.player.anims.play('walk_right', true);
-        } else if (this.cursors.up.isDown || (this.isDragging && this.joystickThumb.y < this.joystickBase.y - 10)) {
-            this.player.setVelocityY(-160);
-            this.player.anims.play('walk_up', true);
-        } else if (this.cursors.down.isDown || (this.isDragging && this.joystickThumb.y > this.joystickBase.y + 10)) {
-            this.player.setVelocityY(160);
-            this.player.anims.play('walk_down', true);
-        } else {
-            this.player.anims.stop();
+        if (!this.isOverlayVisible) {
+            if (this.cursors.left.isDown || (this.isDragging && this.joystickThumb.x < this.joystickBase.x - 10)) {
+                this.player.setVelocityX(-160);
+                this.player.anims.play('walk_left', true);
+            } else if (this.cursors.right.isDown || (this.isDragging && this.joystickThumb.x > this.joystickBase.x + 10)) {
+                this.player.setVelocityX(160);
+                this.player.anims.play('walk_right', true);
+            } else if (this.cursors.up.isDown || (this.isDragging && this.joystickThumb.y < this.joystickBase.y - 10)) {
+                this.player.setVelocityY(-160);
+                this.player.anims.play('walk_up', true);
+            } else if (this.cursors.down.isDown || (this.isDragging && this.joystickThumb.y > this.joystickBase.y + 10)) {
+                this.player.setVelocityY(160);
+                this.player.anims.play('walk_down', true);
+            } else {
+                this.player.anims.stop();
+            }
         }
     }
 
