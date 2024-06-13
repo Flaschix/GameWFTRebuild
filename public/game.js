@@ -16,11 +16,19 @@ class PreloadScene extends Phaser.Scene {
         this.load.image('pressX', 'assets/pressX1.png');
         this.load.image('closeIcon', 'assets/closeIcon.png');
         this.load.image('joystickBase', 'assets/JoystickSplitted.png');
-        this.load.image('joystickThumb', 'assets/LargeHandleFilled.png');
+        this.load.image('joystickThumb', 'assets/Joystick.png');
         this.load.image('mobileXButton', 'assets/Press.png');
 
         // Загружаем изображения для зон
-
+        this.load.image('overlay1', 'assets/1.png');
+        this.load.image('overlay2', 'assets/2.png');
+        this.load.image('overlay3', 'assets/3.png');
+        this.load.image('overlay4', 'assets/4.png');
+        this.load.image('overlay5', 'assets/5.png');
+        this.load.image('overlay6', 'assets/6.png');
+        this.load.image('overlay7', 'assets/7.png');
+        this.load.image('overlay8', 'assets/8.png');
+        this.load.image('overlay9', 'assets/9.png');
     }
 
     create() {
@@ -37,12 +45,7 @@ class MainScene extends Phaser.Scene {
         this.isDragging = false;
         this.currentZoneIndex = -1;
         this.overlayImages = [];
-    }
-
-    preload() {
-        for (let i = 1; i <= 9; i++) {
-            this.load.image(`overlay${i}`, `assets/${i}.png`);
-        }
+        this.originalZonePositions = [];
     }
 
     create() {
@@ -54,6 +57,26 @@ class MainScene extends Phaser.Scene {
         this.createJoystick();
         this.createMobileXButton();
         this.createInputHandlers();
+
+        // Добавляем обработчик события resize
+        window.addEventListener('resize', () => this.resize());
+        this.resize(); // Вызываем resize при создании сцены, чтобы установить правильное положение джойстика
+    }
+
+    resize() {
+        if (this.isMobile()) {
+            this.joystickBase.setPosition(150, this.cameras.main.height - 150);
+            this.joystickThumb.setPosition(150, this.cameras.main.height - 150);
+        }
+
+        // Пересчитываем координаты зон
+        this.zones.forEach((zone, index) => {
+            let originalPos = this.originalZonePositions[index];
+            let scaleX = this.cameras.main.width / this.map.width;
+            let scaleY = this.cameras.main.height / this.map.height;
+            let scale = Math.max(scaleX, scaleY);
+            zone.setPosition(originalPos.x * scale, originalPos.y * scale);
+        });
     }
 
     createMap() {
@@ -111,22 +134,24 @@ class MainScene extends Phaser.Scene {
     createZones() {
         this.zones = [];
         const zonePositions = [
-            { x: 200, y: 200 },
-            { x: 400, y: 200 },
-            { x: 600, y: 200 },
-            { x: 200, y: 400 },
-            { x: 400, y: 400 },
-            { x: 600, y: 400 },
-            { x: 200, y: 600 },
-            { x: 400, y: 600 },
-            { x: 600, y: 600 }
+            { x: 656, y: 652 },
+            { x: 50, y: 378 },
+            { x: 280, y: 50 },
+            { x: 560, y: 355 },
+            { x: 805, y: 287 },
+            { x: 994, y: 437 },
+            { x: 946, y: 32 },
+            { x: 1144, y: 346 },
+            { x: 295, y: 341 }
         ];
 
         zonePositions.forEach((pos, index) => {
-            let zone = this.add.zone(pos.x, pos.y, 100, 100).setOrigin(0.5, 0.5);
+            let zone = this.add.zone(pos.x, pos.y, 40, 40).setOrigin(0.5, 0.5);
             zone.zoneIndex = index + 1;
             this.zones.push(zone);
+            this.originalZonePositions.push(pos); // Сохраняем исходные координаты
         });
+
 
         this.physics.world.enable(this.zones);
     }
@@ -138,8 +163,9 @@ class MainScene extends Phaser.Scene {
         for (let i = 1; i <= 9; i++) {
             let overlayImage = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2, `overlay${i}`);
             overlayImage.setOrigin(0.5, 0.5);
-            overlayImage.setDisplaySize(this.cameras.main.width * 0.8, this.cameras.main.height * 0.9);
+            overlayImage.setDisplaySize(this.cameras.main.width * 0.9, this.cameras.main.height * 0.9);
             overlayImage.setVisible(false);
+            overlayImage.setAlpha(0); // Начальное значение прозрачности
             this.overlayImages.push(overlayImage);
         }
 
@@ -151,11 +177,19 @@ class MainScene extends Phaser.Scene {
         this.closeButton.setDisplaySize(this.overlayImages[0].displayWidth * 0.07, this.overlayImages[0].displayHeight * 0.1);
         this.closeButton.setInteractive();
         this.closeButton.setVisible(false);
+        this.closeButton.setAlpha(0); // Начальное значение прозрачности
 
         this.closeButton.on('pointerdown', () => {
             this.isOverlayVisible = false;
-            this.overlayImages[this.currentZoneIndex - 1].setVisible(false);
-            this.closeButton.setVisible(false);
+            this.tweens.add({
+                targets: [this.overlayImages[this.currentZoneIndex - 1], this.closeButton],
+                alpha: 0,
+                duration: 500,
+                onComplete: () => {
+                    this.overlayImages[this.currentZoneIndex - 1].setVisible(false);
+                    this.closeButton.setVisible(false);
+                }
+            });
         });
     }
 
@@ -164,8 +198,8 @@ class MainScene extends Phaser.Scene {
             this.joystickBase = this.add.image(100, this.cameras.main.height - 100, 'joystickBase').setInteractive();
             this.joystickThumb = this.add.image(100, this.cameras.main.height - 100, 'joystickThumb').setInteractive();
 
-            this.joystickBase.setDisplaySize(100, 100);
-            this.joystickThumb.setDisplaySize(50, 50);
+            this.joystickBase.setDisplaySize(150, 150);
+            this.joystickThumb.setDisplaySize(100, 100);
 
             this.joystickThumb.on('pointerdown', (pointer) => {
                 this.isDragging = true;
@@ -199,15 +233,32 @@ class MainScene extends Phaser.Scene {
 
     createMobileXButton() {
         if (this.isMobile()) {
-            this.mobileXButton = this.add.image(this.cameras.main.width - 100, this.cameras.main.height - 80, 'mobileXButton').setInteractive();
-            this.mobileXButton.setDisplaySize(70, 70);
+            this.mobileXButton = this.add.image(this.cameras.main.width - 150, this.cameras.main.height - 150, 'mobileXButton').setInteractive();
+            this.mobileXButton.setDisplaySize(100, 100);
             this.mobileXButton.setVisible(false);
 
             this.mobileXButton.on('pointerdown', () => {
                 if (this.isInZone) {
                     this.isOverlayVisible = !this.isOverlayVisible;
-                    this.overlayImages[this.currentZoneIndex - 1].setVisible(this.isOverlayVisible);
-                    this.closeButton.setVisible(this.isOverlayVisible);
+                    if (this.isOverlayVisible) {
+                        this.overlayImages[this.currentZoneIndex - 1].setVisible(true);
+                        this.closeButton.setVisible(true);
+                        this.tweens.add({
+                            targets: [this.overlayImages[this.currentZoneIndex - 1], this.closeButton],
+                            alpha: 1,
+                            duration: 500
+                        });
+                    } else {
+                        this.tweens.add({
+                            targets: [this.overlayImages[this.currentZoneIndex - 1], this.closeButton],
+                            alpha: 0,
+                            duration: 500,
+                            onComplete: () => {
+                                this.overlayImages[this.currentZoneIndex - 1].setVisible(false);
+                                this.closeButton.setVisible(false);
+                            }
+                        });
+                    }
                 }
             });
         }
@@ -217,8 +268,25 @@ class MainScene extends Phaser.Scene {
         this.input.keyboard.on('keydown-X', () => {
             if (this.isInZone) {
                 this.isOverlayVisible = !this.isOverlayVisible;
-                this.overlayImages[this.currentZoneIndex - 1].setVisible(this.isOverlayVisible);
-                this.closeButton.setVisible(this.isOverlayVisible);
+                if (this.isOverlayVisible) {
+                    this.overlayImages[this.currentZoneIndex - 1].setVisible(true);
+                    this.closeButton.setVisible(true);
+                    this.tweens.add({
+                        targets: [this.overlayImages[this.currentZoneIndex - 1], this.closeButton],
+                        alpha: 1,
+                        duration: 500
+                    });
+                } else {
+                    this.tweens.add({
+                        targets: [this.overlayImages[this.currentZoneIndex - 1], this.closeButton],
+                        alpha: 0,
+                        duration: 500,
+                        onComplete: () => {
+                            this.overlayImages[this.currentZoneIndex - 1].setVisible(false);
+                            this.closeButton.setVisible(false);
+                        }
+                    });
+                }
             }
         });
     }
@@ -292,7 +360,8 @@ const config = {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,
         width: 1260,
-        height: 740
+        height: 740,
+        parent: 'game-container'
     },
     physics: {
         default: 'arcade',
@@ -304,3 +373,24 @@ const config = {
 };
 
 const game = new Phaser.Game(config);
+
+window.addEventListener('load', () => {
+    resizeGame();
+    window.addEventListener('resize', resizeGame);
+});
+
+function resizeGame() {
+    const canvas = document.querySelector('canvas');
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    const windowRatio = windowWidth / windowHeight;
+    const gameRatio = game.config.width / game.config.height;
+
+    if (windowRatio < gameRatio) {
+        canvas.style.width = windowWidth + 'px';
+        canvas.style.height = (windowWidth / gameRatio) + 'px';
+    } else {
+        canvas.style.width = (windowHeight * gameRatio) + 'px';
+        canvas.style.height = windowHeight + 'px';
+    }
+}
