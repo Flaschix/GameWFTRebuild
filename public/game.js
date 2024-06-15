@@ -93,8 +93,8 @@ class MainScene extends Phaser.Scene {
 
     createPlayer() {
         this.player = this.physics.add.sprite(620, 350, 'character');
-        this.player.setSize(30, 20)
-        this.player.setOffset(8, 30);
+        this.player.setSize(24, 20)
+        this.player.setOffset(11, 40);
 
         // this.debugGraphics = this.add.graphics();
         // this.debugGraphics.lineStyle(2, 0xff0000);
@@ -120,28 +120,28 @@ class MainScene extends Phaser.Scene {
         this.anims.create({
             key: 'walk_down',
             frames: this.anims.generateFrameNumbers('character', { start: 0, end: 3 }),
-            frameRate: 4,
+            frameRate: 10,
             repeat: -1
         });
 
         this.anims.create({
             key: 'walk_left',
             frames: this.anims.generateFrameNumbers('character', { start: 4, end: 7 }),
-            frameRate: 4,
+            frameRate: 10,
             repeat: -1
         });
 
         this.anims.create({
             key: 'walk_right',
             frames: this.anims.generateFrameNumbers('character', { start: 8, end: 11 }),
-            frameRate: 4,
+            frameRate: 10,
             repeat: -1
         });
 
         this.anims.create({
             key: 'walk_up',
             frames: this.anims.generateFrameNumbers('character', { start: 12, end: 15 }),
-            frameRate: 4,
+            frameRate: 10,
             repeat: -1
         });
     }
@@ -149,30 +149,30 @@ class MainScene extends Phaser.Scene {
     createZones() {
         this.zones = [];
         const zonePositions = [
-            { x: 20, y: 220 },
-            { x: 40, y: 490 },
-            { x: 290, y: 400 },
-            { x: 430, y: 300 },
-            { x: 450, y: 211 },
-            { x: 650, y: 350 },
-            { x: 680, y: 536 },
-            { x: 1020, y: 340 },
-            { x: 950, y: 620 }
+            { x: 40, y: 360 }, //0
+            { x: 43, y: 560 }, //1
+            { x: 241, y: 400 }, //2
+            { x: 720, y: 150 }, //3
+            { x: 705, y: 300 }, //4
+            { x: 883, y: 267 }, //5 
+            { x: 895, y: 50 }, //6
+            { x: 1090, y: 150 }, //7
+            { x: 1100, y: 345 } //8
         ];
 
         const zoneSize = [
-            { w: 150, h: 100 },
-            { w: 150, h: 80 },
-            { w: 170, h: 120 },
-            { w: 120, h: 50 },
-            { w: 300, h: 35 },
-            { w: 100, h: 75 },
-            { w: 120, h: 80 },
-            { w: 190, h: 80 },
-            { w: 300, h: 100 },
+            { w: 150, h: 165 }, //0
+            { w: 150, h: 165 }, //1
+            { w: 120, h: 180 }, //2
+            { w: 80, h: 100 }, //3
+            { w: 120, h: 110 }, //4
+            { w: 120, h: 220 }, //5
+            { w: 120, h: 80 }, //6
+            { w: 120, h: 150 }, //7
+            { w: 120, h: 150 }, //8
         ];
 
-        // let z = 8
+        let z = 8
         zonePositions.forEach((pos, index) => {
             let zone = this.add.zone(pos.x, pos.y, zoneSize[index].w, zoneSize[index].h).setOrigin(0, 0);
             zone.zoneIndex = index + 1;
@@ -334,9 +334,9 @@ class MainScene extends Phaser.Scene {
             }
         });
 
-        this.input.keyboard.on('keydown-C', () => {
-            console.log(this.player.x + " " + this.player.y)
-        });
+        // this.input.keyboard.on('keydown-C', () => {
+        //     console.log(this.player.x + " " + this.player.y)
+        // });
     }
 
     update() {
