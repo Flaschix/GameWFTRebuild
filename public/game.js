@@ -93,9 +93,9 @@ class MainScene extends Phaser.Scene {
 
     createPlayer() {
         this.player = this.physics.add.sprite(620, 350, 'character');
-        this.player.setSize(32, 20)
-        this.player.setOffset(8, 40);
-        // this.player.setBoundsRectangle(new Phaser.Geom.Rectangle(this.player.x, this.player.y, 10, 10));
+        this.player.setSize(30, 20)
+        this.player.setOffset(8, 30);
+
         // this.debugGraphics = this.add.graphics();
         // this.debugGraphics.lineStyle(2, 0xff0000);
         // this.physics.world.on('worldstep', () => {
@@ -120,28 +120,28 @@ class MainScene extends Phaser.Scene {
         this.anims.create({
             key: 'walk_down',
             frames: this.anims.generateFrameNumbers('character', { start: 0, end: 3 }),
-            frameRate: 10,
+            frameRate: 4,
             repeat: -1
         });
 
         this.anims.create({
             key: 'walk_left',
             frames: this.anims.generateFrameNumbers('character', { start: 4, end: 7 }),
-            frameRate: 10,
+            frameRate: 4,
             repeat: -1
         });
 
         this.anims.create({
             key: 'walk_right',
             frames: this.anims.generateFrameNumbers('character', { start: 8, end: 11 }),
-            frameRate: 10,
+            frameRate: 4,
             repeat: -1
         });
 
         this.anims.create({
             key: 'walk_up',
             frames: this.anims.generateFrameNumbers('character', { start: 12, end: 15 }),
-            frameRate: 10,
+            frameRate: 4,
             repeat: -1
         });
     }
@@ -149,27 +149,27 @@ class MainScene extends Phaser.Scene {
     createZones() {
         this.zones = [];
         const zonePositions = [
-            { x: 610, y: 240 },
-            { x: 800, y: 310 },
-            { x: 430, y: 316 },
-            { x: 420, y: 436 },
-            { x: 600, y: 495 },
-            { x: 560, y: 40 },
-            { x: 955, y: 380 },
-            { x: 322, y: 170 },
-            { x: 700, y: 680 }
+            { x: 20, y: 220 },
+            { x: 40, y: 490 },
+            { x: 290, y: 400 },
+            { x: 430, y: 300 },
+            { x: 450, y: 211 },
+            { x: 650, y: 350 },
+            { x: 680, y: 536 },
+            { x: 1020, y: 340 },
+            { x: 950, y: 620 }
         ];
 
         const zoneSize = [
-            { w: 40, h: 30 },
-            { w: 40, h: 50 },
-            { w: 15, h: 15 },
-            { w: 25, h: 30 },
-            { w: 35, h: 35 },
-            { w: 30, h: 30 },
-            { w: 30, h: 30 },
-            { w: 30, h: 30 },
-            { w: 30, h: 30 },
+            { w: 150, h: 100 },
+            { w: 150, h: 80 },
+            { w: 170, h: 120 },
+            { w: 120, h: 50 },
+            { w: 300, h: 35 },
+            { w: 100, h: 75 },
+            { w: 120, h: 80 },
+            { w: 190, h: 80 },
+            { w: 300, h: 100 },
         ];
 
         // let z = 8
@@ -334,9 +334,9 @@ class MainScene extends Phaser.Scene {
             }
         });
 
-        // this.input.keyboard.on('keydown-C', () => {
-        //     console.log(this.player.x + " " + this.player.y)
-        // });
+        this.input.keyboard.on('keydown-C', () => {
+            console.log(this.player.x + " " + this.player.y)
+        });
     }
 
     update() {
@@ -363,6 +363,7 @@ class MainScene extends Phaser.Scene {
                 this.player.anims.play('walk_down', true);
             } else {
                 this.player.anims.stop();
+                this.player.setFrame(0);
             }
         }
     }
@@ -373,8 +374,8 @@ class MainScene extends Phaser.Scene {
         const playerBounds = new Phaser.Geom.Rectangle(this.player.body.x, this.player.body.y, this.player.body.width, this.player.body.height);
 
         this.zones.forEach(zone => {
-            const zoneBounds = new Phaser.Geom.Rectangle(zone.body.x, zone.body.y, zone.body.width, zone.body.height);
-            if (Phaser.Geom.Intersects.RectangleToRectangle(playerBounds, zoneBounds)) {
+            // const zoneBounds = new Phaser.Geom.Rectangle(zone.body.x, zone.body.y, zone.body.width, zone.body.height);
+            if (Phaser.Geom.Intersects.RectangleToRectangle(playerBounds, zone.getBounds())) {
                 this.isInZone = true;
                 this.currentZoneIndex = zone.zoneIndex;
             }
