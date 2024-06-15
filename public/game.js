@@ -88,26 +88,11 @@ class MainScene extends Phaser.Scene {
         this.map.setScale(scale);
 
         // Устанавливаем границы мира на основе размеров карты
-        this.physics.world.setBounds(0, 20, this.map.width * scale, this.map.height * scale - 20);
+        this.physics.world.setBounds(0, 0, this.map.width * scale, this.map.height * scale);
     }
 
     createPlayer() {
-        this.player = this.physics.add.sprite(620, 350, 'character');
-        this.player.setSize(32, 20)
-        this.player.setOffset(8, 40);
-        // this.player.setBoundsRectangle(new Phaser.Geom.Rectangle(this.player.x, this.player.y, 10, 10));
-        // this.debugGraphics = this.add.graphics();
-        // this.debugGraphics.lineStyle(2, 0xff0000);
-        // this.physics.world.on('worldstep', () => {
-        //     this.debugGraphics.clear();
-        //     this.debugGraphics.strokeRect(
-        //         this.player.body.x,
-        //         this.player.body.y,
-        //         this.player.body.width,
-        //         this.player.body.height
-        //     );
-        // });
-
+        this.player = this.physics.add.sprite(400, 300, 'character');
         this.cursors = this.input.keyboard.createCursorKeys();
 
         // Ограничиваем движение персонажа в пределах границ мира
@@ -120,7 +105,7 @@ class MainScene extends Phaser.Scene {
         this.anims.create({
             key: 'walk_down',
             frames: this.anims.generateFrameNumbers('character', { start: 0, end: 3 }),
-            frameRate: 10,
+            frameRate: 6,
             repeat: -1
         });
 
@@ -149,50 +134,26 @@ class MainScene extends Phaser.Scene {
     createZones() {
         this.zones = [];
         const zonePositions = [
-            { x: 610, y: 240 },
-            { x: 800, y: 310 },
-            { x: 430, y: 316 },
-            { x: 420, y: 436 },
-            { x: 600, y: 495 },
-            { x: 560, y: 40 },
-            { x: 955, y: 380 },
-            { x: 322, y: 170 },
-            { x: 700, y: 680 }
+            { x: 656, y: 652 },
+            { x: 50, y: 378 },
+            { x: 280, y: 50 },
+            { x: 560, y: 355 },
+            { x: 805, y: 287 },
+            { x: 994, y: 437 },
+            { x: 946, y: 32 },
+            { x: 1144, y: 346 },
+            { x: 295, y: 341 }
         ];
 
-        const zoneSize = [
-            { w: 40, h: 30 },
-            { w: 40, h: 50 },
-            { w: 15, h: 15 },
-            { w: 25, h: 30 },
-            { w: 35, h: 35 },
-            { w: 30, h: 30 },
-            { w: 30, h: 30 },
-            { w: 30, h: 30 },
-            { w: 30, h: 30 },
-        ];
-
-        // let z = 8
         zonePositions.forEach((pos, index) => {
-            let zone = this.add.zone(pos.x, pos.y, zoneSize[index].w, zoneSize[index].h).setOrigin(0, 0);
+            let zone = this.add.zone(pos.x, pos.y, 40, 40).setOrigin(0.5, 0.5);
             zone.zoneIndex = index + 1;
             this.zones.push(zone);
-            this.originalZonePositions.push(pos);
+            this.originalZonePositions.push(pos); // Сохраняем исходные координаты
         });
 
-        this.physics.world.enable(this.zones);
 
-        // this.debugGraphics2 = this.add.graphics();
-        // this.debugGraphics2.lineStyle(2, 0xff0000);
-        // this.physics.world.on('worldstep', () => {
-        //     this.debugGraphics2.clear();
-        //     this.debugGraphics2.strokeRect(
-        //         this.zones[z].x,
-        //         this.zones[z].y,
-        //         this.zones[z].width,
-        //         this.zones[z].height
-        //     );
-        // });
+        this.physics.world.enable(this.zones);
     }
 
     createOverlays() {
@@ -225,8 +186,10 @@ class MainScene extends Phaser.Scene {
                 alpha: 0,
                 duration: 500,
                 onComplete: () => {
-                    this.overlayImages[this.currentZoneIndex - 1].setVisible(false);
-                    this.closeButton.setVisible(false);
+		    try {
+                        this.overlayImages[this.currentZoneIndex - 1].setVisible(false);
+                        this.closeButton.setVisible(false);
+		    } catch(e) {}
                 }
             });
         });
@@ -293,10 +256,8 @@ class MainScene extends Phaser.Scene {
                             alpha: 0,
                             duration: 500,
                             onComplete: () => {
-                                try {
-                                    this.overlayImages[this.currentZoneIndex - 1].setVisible(false);
-                                    this.closeButton.setVisible(false);
-                                } catch (e) { }
+                                this.overlayImages[this.currentZoneIndex - 1].setVisible(false);
+                                this.closeButton.setVisible(false);
                             }
                         });
                     }
@@ -326,17 +287,12 @@ class MainScene extends Phaser.Scene {
                             try {
                                 this.overlayImages[this.currentZoneIndex - 1].setVisible(false);
                                 this.closeButton.setVisible(false);
-                            } catch (e) { }
-
+		            } catch(e) {}
                         }
                     });
                 }
             }
         });
-
-        // this.input.keyboard.on('keydown-C', () => {
-        //     console.log(this.player.x + " " + this.player.y)
-        // });
     }
 
     update() {
@@ -370,11 +326,8 @@ class MainScene extends Phaser.Scene {
     checkZones() {
         this.isInZone = false;
         this.currentZoneIndex = -1;
-        const playerBounds = new Phaser.Geom.Rectangle(this.player.body.x, this.player.body.y, this.player.body.width, this.player.body.height);
-
         this.zones.forEach(zone => {
-            const zoneBounds = new Phaser.Geom.Rectangle(zone.body.x, zone.body.y, zone.body.width, zone.body.height);
-            if (Phaser.Geom.Intersects.RectangleToRectangle(playerBounds, zoneBounds)) {
+            if (Phaser.Geom.Intersects.RectangleToRectangle(this.player.getBounds(), zone.getBounds())) {
                 this.isInZone = true;
                 this.currentZoneIndex = zone.zoneIndex;
             }
